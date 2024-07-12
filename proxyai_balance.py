@@ -1,12 +1,10 @@
-import time
 from datetime import datetime
 
 import requests
-import schedule
 import telegram
 
 from logger_config import setup_logging
-from main import ADMIN_CHAT_ID, PROXYAI_TOKEN, TELEGRAM_TOKEN
+from constants import ADMIN_CHAT_ID, PROXYAI_TOKEN, TELEGRAM_TOKEN
 
 logger = setup_logging()
 
@@ -47,14 +45,3 @@ def check_balance():
         balance = get_balance(PROXYAI_TOKEN)
         if balance is not None and balance < 50:
             notify_admin(ADMIN_CHAT_ID, balance)
-
-
-# Запускаем проверку каждые 3 часа
-schedule.every(3).hours.do(check_balance)
-
-
-# Запуск планировщика в отдельном потоке
-def run_scheduler():
-    while True:
-        schedule.run_pending()
-        time.sleep(1)

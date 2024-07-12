@@ -85,10 +85,20 @@ class DatabaseHandler:
 
     def get_history(self, user_id: int) -> list:
         cursor = self.conn.execute(
-            'SELECT role, content FROM history WHERE user_id = ?',
+            """
+            SELECT
+                    role,
+                    content,
+                    message_date
+            FROM history
+            WHERE user_id = ?
+            """,
             (user_id,))
         return [
-            {'role': row[0], 'content': row[1]} for row in cursor.fetchall()
+            {'role': row[0],
+             'content': row[1],
+             'message_date': row[2]
+             } for row in cursor.fetchall()
             ]
 
     def log_tokens(self, user_id: int, tokens: int) -> None:

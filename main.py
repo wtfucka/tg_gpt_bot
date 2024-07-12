@@ -1,32 +1,23 @@
 import asyncio
-import os
 from threading import Thread
 
-from dotenv import load_dotenv
 from telegram.ext import (Application,
                           CommandHandler,
                           filters,
                           MessageHandler,
                           CallbackQueryHandler
                           )
-import schedule
 
 from admin_handler import AdminHandler
+from constants import ADMIN_CHAT_ID, PROXYAI_TOKEN, TELEGRAM_TOKEN
 from db_handler import DatabaseHandler
 from logger_config import setup_logging
 from openai_handler import OpenAIHandler
+from scheduler import run_scheduler
 from user_handler import UserHandler
 
 # Настройка логирования
 logger = setup_logging()
-
-# Загрузка переменных окружения
-load_dotenv()
-
-# Константы
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-PROXYAI_TOKEN = os.getenv('PROXYAI_TOKEN')
-ADMIN_CHAT_ID = int(os.getenv('ADMIN_CHAT_ID'))
 
 
 def main():
@@ -62,12 +53,22 @@ def main():
     application.add_handler(CallbackQueryHandler(user_handler.button))
 
     # Запуск планировщика в отдельном потоке
-    scheduler_thread = Thread(target=lambda: schedule.run_continuously())
+    # asyncio.create_task(run_scheduler())
+    scheduler_thread = Thread(target=run_scheduler)
     scheduler_thread.start()
 
     # Запуск бота
     application.run_polling()
+    # await application.initialize()
+    # await application.start()
+    # await application.updater.start_polling()
+    # await application.updater.stop()
+    # await application.stop()
+    # await application.shutdown()
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        exit()

@@ -15,11 +15,12 @@ class OpenAIHandler:
             response = self.client.chat.completions.create(
                 model=model,
                 messages=messages,
-                max_tokens=2000,
+                max_tokens=3000,
                 temperature=0.8,
                 top_p=0.5
             )
             if response.choices:
+                # return response.choices[0].message.content.strip()
                 return (response.choices[0].message.content.strip(),
                         response.usage.total_tokens)
             else:

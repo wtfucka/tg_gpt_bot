@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from telegram import (InlineKeyboardButton,
                       InlineKeyboardMarkup,
                       MessageEntity,
@@ -73,6 +75,7 @@ class UserHandler:
                              context: ContextTypes.DEFAULT_TYPE) -> None:
         user_id = update.message.from_user.id
         user_message = update.message.text
+        previous_day = int((datetime.now() - timedelta(days=1)).timestamp())
 
         if not self.db_handler.is_user_whitelisted(user_id):
             await update.message.reply_text('У вас нет доступа к этому боту.')
@@ -80,15 +83,16 @@ class UserHandler:
 
         self.db_handler.save_message(user_id, 'user', user_message)
 
-        history = self.db_handler.get_history(user_id)
         instructions = '\n'.join([user_instructions, answer_instructions])
         system_message = {'role': 'system',
                           'content': instructions}
+        history = self.db_handler.get_history(user_id)
         history_messages = [
             {'role': entry['role'],
-             'content': entry['content']} for entry in history
+             'content': entry['content']
+             } for entry in history if entry['message_date'] > previous_day
              ]
-        messages = [system_message, history_messages]
+        messages = [system_message, history_messages[0]]
 
         response, tokens_used = await self.openai_handler.get_response(
             self.selected_model,
@@ -98,7 +102,7 @@ class UserHandler:
         self.db_handler.save_message(user_id, 'assistant', response)
         self.db_handler.log_tokens(user_id, tokens_used)
 
-        await update.message.reply_text(response, parse_mode='MarkdownV2')
+        await update.message.reply_text(response, parse_mode='Markdown')
 
     async def button(self,
                      update: Update,
@@ -110,26 +114,32 @@ class UserHandler:
         if query.data == 'check_users':
             users = self.db_handler.get_whitelist()
             token_usage = self.db_handler.get_token_usage()
-            user_info = '\n'.join([f"ID: {user['user_id']}, Username: {user['username']}" for user in users])
-            token_info = '\n'.join([f"ID: {token['user_id']}, Tokens used: {token['tokens_used']}" for token in token_usage])
-            await query.edit_message_text(f'Пользователи:\n{user_info}\n\nИспользование токенов:\n{token_info}')
+            user_info = '\n'.join(
+                [f"ID: {user['user_id']}, Username: {user['username']}" for user in users]
+                )
+            token_info = '\n'.join(
+                [f"ID: {token['user_id']}, Tokens used: {token['tokens_used']}" for token in token_usage]
+                )
+            await query.edit_message_text(
+                f'Пользователи:\n{user_info}\n\nИспользование токенов:\n{token_info}'
+                )
         else:
             await query.edit_message_text(
                 f'Выбрана модель: {self.selected_model}'
                 )
 
-    async def format_code_blocks(self, text: str) -> list:
-        entities = []
-        start = 0
-        while start < len(text):
-            start = text.find('```', start)
-            if start == -1:
-                break
-            end = text.find('```', start + 3)
-            if end == -1:
-                break
-            entities.append(MessageEntity(type=MessageEntity.CODE,
-                                          offset=start,
-                                          length=end - start + 3))
-            start = end + 3
-        return entities
+    # async def format_code_blocks(self, text: str) -> list:
+    #     entities = []
+    #     start = 0
+    #     while start < len(text):
+    #         start = text.find('```', start)
+    #         if start == -1:
+    #             break
+    #         end = text.find('```', start + 3)
+    #         if end == -1:
+    #             break
+    #         entities.append(MessageEntity(type=MessageEntity.CODE,
+    #                                       offset=start,
+    #                                       length=end - start + 3))
+    #         start = end + 3
+    #     return entities

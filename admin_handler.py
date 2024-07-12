@@ -84,9 +84,15 @@ class AdminHandler:
         try:
             users = self.db_handler.get_whitelist()
             token_usage = self.db_handler.get_token_usage()
-            user_info = "\n".join([f"ID: {user['user_id']}, Username: {user['username']}" for user in users])
-            token_info = "\n".join([f"ID: {token['user_id']}, Tokens used: {token['tokens_used']}" for token in token_usage])
-            await update.message.reply_text(f"Пользователи:\n{user_info}\n\nИспользование токенов:\n{token_info}")
+            user_info = "\n".join(
+                [f"ID: {user['user_id']}, Username: {user['username']}" for user in users]
+                )
+            token_info = "\n".join(
+                [f"ID: {token['user_id']}, Tokens used: {token['tokens_used']}" for token in token_usage]
+                )
+            await update.message.reply_text(
+                f"Пользователи:\n{user_info}\n\nИспользование токенов:\n{token_info}"
+                )
         except Exception as e:
             logger.error(f'Error in check_users_command: {e}')
             await update.message.reply_text(
