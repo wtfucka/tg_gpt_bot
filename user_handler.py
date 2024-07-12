@@ -11,6 +11,7 @@ import db_handler
 import openai_handler
 from gpt_instructions import answer_instructions, user_instructions
 from logger_config import setup_logging
+from proxyai_balance import check_balance
 
 logger = setup_logging()
 
@@ -61,12 +62,14 @@ class UserHandler:
                                   callback_data='gpt-4-turbo'),
              InlineKeyboardButton('GPT-4o',
                                   callback_data='gpt-4o')],
-            [InlineKeyboardButton('Добавить пользователя',
+            [InlineKeyboardButton('Открыть доступ',
                                   callback_data='add_user'),
-             InlineKeyboardButton('Деактивировать пользователя',
+             InlineKeyboardButton('Закрыть доступ',
                                   callback_data='deactivate_user')],
-            [InlineKeyboardButton('Проверить список пользователей',
-                                  callback_data='check_users')]
+            [InlineKeyboardButton('Список пользователей',
+                                  callback_data='check_users'),
+             InlineKeyboardButton('Запрос баланса',
+                                  callback_data='check_balance')]
         ]
         return InlineKeyboardMarkup(keyboard)
 
@@ -92,7 +95,7 @@ class UserHandler:
              'content': entry['content']
              } for entry in history if entry['message_date'] > previous_day
              ]
-        messages = [system_message, history_messages[0]]
+        messages = [system_message] + history_messages
 
         response, tokens_used = await self.openai_handler.get_response(
             self.selected_model,
@@ -123,6 +126,10 @@ class UserHandler:
             await query.edit_message_text(
                 f'Пользователи:\n{user_info}\n\nИспользование токенов:\n{token_info}'
                 )
+        # Асинхронный запрос баланса
+        elif query.data == 'check_balance':
+            balance = check_balance()
+            await query.edit_message_text(f'Текущий баланс: {balance} рублей.')
         else:
             await query.edit_message_text(
                 f'Выбрана модель: {self.selected_model}'

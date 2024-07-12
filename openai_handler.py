@@ -28,4 +28,4 @@ class OpenAIHandler:
         except Exception as e:
             logger.error(f'Ошибка: {e}')
             return ('Произошла ошибка при запросе к OpenAI.'
-                    'Пожалуйста, попробуйте позже.', 0)
+                    ' Пожалуйста, попробуйте позже.', 0)

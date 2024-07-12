@@ -24,6 +24,7 @@ def get_balance(api_key):
             return 'Недостаточно средств для выполнения запроса.'
 
         data = response.json()
+        logger.info(data)
         return data["balance"]
     except requests.RequestException as e:
         logger.error(f"Ошибка при запросе баланса: {e}")

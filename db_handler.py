@@ -92,6 +92,9 @@ class DatabaseHandler:
                     message_date
             FROM history
             WHERE user_id = ?
+                and role = 'user'
+            ORDER BY message_date desc
+            LIMIT 3
             """,
             (user_id,))
         return [
