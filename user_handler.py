@@ -11,7 +11,7 @@ import db_handler
 import openai_handler
 from gpt_instructions import answer_instructions, user_instructions
 from logger_config import setup_logging
-from proxyai_balance import check_balance
+from proxyai_balance import check_current_balance
 
 logger = setup_logging()
 
@@ -128,7 +128,7 @@ class UserHandler:
                 )
         # Асинхронный запрос баланса
         elif query.data == 'check_balance':
-            balance = check_balance()
+            balance = check_current_balance()
             await query.edit_message_text(f'Текущий баланс: {balance} рублей.')
         else:
             await query.edit_message_text(

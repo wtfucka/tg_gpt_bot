@@ -46,3 +46,7 @@ def check_balance():
         balance = get_balance(PROXYAI_TOKEN)
         if balance is not None and balance < 50:
             notify_admin(ADMIN_CHAT_ID, balance)
+
+
+def check_current_balance():
+    return get_balance(PROXYAI_TOKEN)
