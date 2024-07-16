@@ -26,7 +26,7 @@ class AdminHandler:
                                context: ContextTypes.DEFAULT_TYPE) -> None:
         user_id = update.message.from_user.id
 
-        if user_id != self.admin_chat_id:
+        if str(user_id) != str(self.admin_chat_id):
             await update.message.reply_text(self.permission_message)
             return
         try:
@@ -53,7 +53,7 @@ class AdminHandler:
             ) -> None:
         user_id = update.message.from_user.id
 
-        if user_id != self.admin_chat_id:
+        if str(user_id) != str(self.admin_chat_id):
             await update.message.reply_text(self.permission_message)
             return
 

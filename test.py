@@ -1,16 +1,20 @@
-from constants import PROXYAI_TOKEN
-import requests
-from pprint import pprint
+import sqlite3
+from datetime import datetime, timedelta, timezone
 
-url = "https://api.proxyapi.ru/proxyapi/balance"
-headers = {
-    "Authorization": f"Bearer {PROXYAI_TOKEN}"
-}
-
-
-response = requests.get(url, headers=headers)
-
-if response.status_code == 402:
-    print('Недостаточно средств для выполнения запроса.')
-data = response.json()
-pprint(data['balance'])
+conn = sqlite3.connect('tg_bot.db')
+with conn:
+    date_add = int(datetime.now(
+        tz=timezone(
+            timedelta(
+                hours=3
+                )
+            )
+        ).timestamp())
+    conn.execute('''
+        INSERT INTO whitelist (
+                            user_id,
+                            username,
+                            date_add,
+                            active)
+        VALUES (?, ?, ?, ?)
+    ''', (982120425, 'anabozina', date_add, True))
