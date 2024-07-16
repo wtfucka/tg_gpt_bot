@@ -71,6 +71,12 @@ class DatabaseHandler:
                 UPDATE whitelist SET active = ?, date_off = ? WHERE user_id = ?
             ''', (False, date_off, user_id))
 
+    def activate_user_in_whitelist(self, user_id: int) -> None:
+        with self.conn:
+            self.conn.execute('''
+                UPDATE whitelist SET active = ?, date_off = ? WHERE user_id = ?
+            ''', (True, None, user_id))
+
     def save_message(self, user_id: int, role: str, content: str) -> None:
         with self.conn:
             message_date = int(datetime.now().timestamp())

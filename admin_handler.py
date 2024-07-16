@@ -53,7 +53,7 @@ class AdminHandler:
             ) -> None:
         user_id = update.message.from_user.id
 
-        if str(user_id) != str(self.admin_chat_id):
+        if user_id != self.admin_chat_id:
             await update.message.reply_text(self.permission_message)
             return
 
@@ -62,6 +62,33 @@ class AdminHandler:
             self.db_handler.deactivate_user_in_whitelist(target_user_id)
             await update.message.reply_text(
                 f'Пользователь с ID {target_user_id} деактивирован.'
+                )
+        except IndexError:
+            await update.message.reply_text(self.idx_message_error)
+        except ValueError:
+            await update.message.reply_text(self.value_message_error)
+        except Exception as e:
+            logger.error(f'Error in deactivate_user_command: {e}')
+            await update.message.reply_text(
+                'Произошла ошибка при деактивации пользователя.'
+                )
+
+    async def activate_user_command(
+            self,
+            update: Update,
+            context: ContextTypes.DEFAULT_TYPE
+            ) -> None:
+        user_id = update.message.from_user.id
+
+        if user_id != self.admin_chat_id:
+            await update.message.reply_text(self.permission_message)
+            return
+
+        try:
+            target_user_id = int(context.args[0])
+            self.db_handler.activate_user_in_whitelist(target_user_id)
+            await update.message.reply_text(
+                f'Пользователь с ID {target_user_id} активирован.'
                 )
         except IndexError:
             await update.message.reply_text(self.idx_message_error)

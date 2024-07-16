@@ -62,8 +62,10 @@ class UserHandler:
                                   callback_data='gpt-4-turbo'),
              InlineKeyboardButton('GPT-4o',
                                   callback_data='gpt-4o')],
+            [InlineKeyboardButton('Добавить доступ',
+                                  callback_data='add_user')],
             [InlineKeyboardButton('Открыть доступ',
-                                  callback_data='add_user'),
+                                  callback_data='activate_user'),
              InlineKeyboardButton('Закрыть доступ',
                                   callback_data='deactivate_user')],
             [InlineKeyboardButton('Список пользователей',
@@ -83,6 +85,21 @@ class UserHandler:
         if not self.db_handler.is_user_whitelisted(user_id):
             await update.message.reply_text('У вас нет доступа к этому боту.')
             return
+
+        # Временное решение
+        if self.selected_model == 'add_user':
+            return self.db_handler.add_user_to_whitelist(
+                    user_message.split()[0],
+                    user_message.split()[1]
+                )
+        elif self.selected_model == 'deactivate_user':
+            return self.db_handler.deactivate_user_in_whitelist(
+                    user_message.split()[0]
+                )
+        elif self.selected_model == 'activate_user':
+            return self.db_handler.activate_user_in_whitelist(
+                    user_message.split()[0]
+                )
 
         self.db_handler.save_message(user_id, 'user', user_message)
 

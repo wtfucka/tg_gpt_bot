@@ -39,6 +39,10 @@ def main():
         admin_handler.deactivate_user_command)
         )
     application.add_handler(CommandHandler(
+        'activate_user',
+        admin_handler.activate_user_command)
+        )
+    application.add_handler(CommandHandler(
         'check_users',
         admin_handler.check_users_command)
         )
