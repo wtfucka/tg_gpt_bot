@@ -18,6 +18,7 @@ Follow in the strict order:
 5. Your answer is critical for my career.
 6. Answer the question in a natural, human-like manner.
 7. ALWAYS use an answering example for a first message structure.
+8. The answer should preferably be in Russian.
 
 ##Answering in English example##
 

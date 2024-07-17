@@ -79,7 +79,7 @@ class UserHandler:
                              update: Update,
                              context: ContextTypes.DEFAULT_TYPE) -> None:
         user_id = update.message.from_user.id
-        user_message = update.message.text
+        message = update.message.text
         previous_day = int((datetime.now() - timedelta(days=1)).timestamp())
 
         if not self.db_handler.is_user_whitelisted(user_id):
@@ -89,19 +89,17 @@ class UserHandler:
         # Временное решение
         if self.selected_model == 'add_user':
             return self.db_handler.add_user_to_whitelist(
-                    user_message.split()[0],
-                    user_message.split()[1]
+                    message.split()[0],
+                    message.split()[1]
                 )
         elif self.selected_model == 'deactivate_user':
             return self.db_handler.deactivate_user_in_whitelist(
-                    user_message.split()[0]
+                    message.split()[0]
                 )
         elif self.selected_model == 'activate_user':
             return self.db_handler.activate_user_in_whitelist(
-                    user_message.split()[0]
+                    message.split()[0]
                 )
-
-        self.db_handler.save_message(user_id, 'user', user_message)
 
         instructions = '\n'.join([user_instructions, answer_instructions])
         system_message = {'role': 'system',
@@ -112,7 +110,14 @@ class UserHandler:
              'content': entry['content']
              } for entry in history if entry['message_date'] > previous_day
              ]
-        messages = [system_message] + history_messages
+        self.db_handler.save_message(user_id, 'user', message)
+        user_message = [
+            {
+                'role': 'user',
+                'content': message
+            }
+        ]
+        messages = [system_message] + history_messages + user_message
 
         response, tokens_used = await self.openai_handler.get_response(
             self.selected_model,
